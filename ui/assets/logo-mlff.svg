@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 196 48" width="196" height="48" role="img" aria-label="Multi-lane Free Flow">
+  <rect x="2" y="4" width="40" height="40" rx="10" fill="#14213D"/>
+  <rect x="8" y="11" width="28" height="4" rx="1.5" fill="#7FE7DC"/>
+  <rect x="9" y="11" width="3" height="25" rx="1" fill="#7FE7DC"/>
+  <rect x="32" y="11" width="3" height="25" rx="1" fill="#7FE7DC"/>
+  <path d="M16.5 15 L13.5 28 H19.5 Z M22.5 15 L19.5 28 H25.5 Z M28.5 15 L25.5 28 H31.5 Z" fill="#0FA3B1" opacity="0.9"/>
+  <path d="M7 39 H37" stroke="#0FA3B1" stroke-width="2.2" stroke-dasharray="4 3"/>
+  <text x="52" y="21" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="15" font-weight="800" fill="#14213D" letter-spacing="0.2">Multi-lane</text>
+  <text x="52" y="39" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="15" font-weight="800" fill="#0FA3B1" letter-spacing="0.2">Free Flow</text>
+</svg>

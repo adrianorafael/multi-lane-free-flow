@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────────────────────────
+# Dynatrace App .gitignore
+# Part of "Development Pattern for Dynatrace" — rule R1.
+# Put this in place BEFORE the first commit.
+# ─────────────────────────────────────────────────────────────
+
+# Dynatrace App Toolkit — HOLDS CACHED OAUTH TOKENS FOR YOUR TENANT
+.dt-app/
+
+# Environment variables — tenant URL, platform token, MCP credentials
+.env
+.env.local
+.env.*.local
+.env.production
+.env.production.local
+
+# Certificates & keys
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# Local mock data captured from a real tenant
+/settings/local-mock-data/secrets.json
+/settings/local-mock-data/persistence/
+**/fixtures/*.local.json
+
+# Safety net: the official Dynatrace AI skills must be fetched on demand, never
+# vendored. If anyone clones them here anyway, they still must not be committed --
+# a frozen copy goes stale and looks authoritative while being wrong.
+.dynatrace-ai-skills/
+dynatrace-for-ai/
+
+# Compiled output
+/dist
+/build
+/tmp
+/out
+
+# Dependencies
+/node_modules
+
+# IDEs and editors
+/.idea
+*.iml
+.project
+.classpath
+*.launch
+.settings/
+*.sublime-workspace
+.history/
+
+# VS Code — keep only the shared, placeholder-safe files
+/.vscode/*
+!/.vscode/settings.json
+!/.vscode/tasks.json
+!/.vscode/launch.json
+!/.vscode/extensions.json
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build caches
+.cache/
+.parcel-cache/
+.webpack/
+.vite/
+
+# Coverage
+/coverage
+
+# TypeScript
+*.tsbuildinfo

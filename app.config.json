@@ -1,0 +1,12 @@
+{
+  "$schema": "./.dt-app/app.config.schema.json",
+  "environmentUrl": "https://YOUR-ENVIRONMENT.apps.dynatrace.com/",
+  "app": {
+    "name": "Multi-lane Free Flow",
+    "version": "0.1.0",
+    "description": "Animated multi-lane free-flow toll gantry: from passage to charge",
+    "id": "my.multi.lane.free.flow",
+    "icon": "./ui/assets/app-icon.svg",
+    "scopes": []
+  }
+}

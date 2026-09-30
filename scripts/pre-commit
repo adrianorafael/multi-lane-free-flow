@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Git pre-commit hook — "Development Pattern for Dynatrace", rule R1.
+#
+# Install:
+#   cp scripts/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# Bypass (only when you are certain, and you should almost never be):
+#   git commit --no-verify
+
+set -euo pipefail
+SCANNER="scripts/scan-secrets.sh"
+
+if [ ! -f "$SCANNER" ]; then
+  echo "⚠️  scan-secrets.sh not found at $SCANNER — skipping secret scan."
+  exit 0
+fi
+
+echo "🔒 pre-commit: scanning staged changes for secrets and tenant data…"
+if ! git diff --cached | bash "$SCANNER" --stdin; then
+  echo
+  echo "❌ Commit aborted: staged content contains secrets or tenant data."
+  exit 1
+fi

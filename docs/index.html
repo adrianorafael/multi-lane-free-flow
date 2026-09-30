@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<!--
+  Project page for Multi-lane Free Flow for Dynatrace (GitHub Pages, published from docs/).
+  Single self-contained file: no build step, no CDN, no external JS.
+  Keep in sync with README.md — same disclaimer, scopes, cost numbers, troubleshooting rows and version.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-lane Free Flow for Dynatrace</title>
+  <meta name="description" content="A Dynatrace App that animates a multi-lane free-flow toll gantry — every vehicle, tag read, plate read and charge — with scripted Dynatrace Intelligence incidents, on simulated data." />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <style>
+    :root {
+      --bg: #0b0b16; --bg-elev: #12121f; --bg-card: #16162a; --border: #262640;
+      --text: #e7e7f0; --text-dim: #a0a0b8; --text-faint: #6b6b85;
+      --blue: #1496ff; --green: #b4dc00; --purple: #8a4fd0;
+      --critical: #ff6b6b; --warning: #ffc043;
+      --radius: 14px; --maxw: 1080px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace; font-size: 0.88em;
+      background: #1d1d33; padding: 2px 6px; border-radius: 6px; color: #c9d7ff; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+    nav { position: sticky; top: 0; z-index: 50; background: rgba(11,11,22,0.85);
+      backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+    nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.05rem; }
+    .brand img { width: 30px; height: 30px; display: block; }
+    .nav-links { display: flex; gap: 20px; align-items: center; }
+    .nav-links a { color: var(--text-dim); font-size: 0.88rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .nav-gh { border: 1px solid var(--border); padding: 7px 14px; border-radius: 8px;
+      color: var(--text) !important; background: var(--bg-card); }
+    .nav-gh:hover { border-color: var(--blue); text-decoration: none !important; }
+    @media (max-width: 860px) { .nav-links a:not(.nav-gh) { display: none; } }
+
+    header.hero { padding: 84px 0 56px; position: relative; overflow: hidden; }
+    header.hero::before { content: ""; position: absolute; top: -160px; left: 50%;
+      transform: translateX(-50%); width: 900px; height: 500px; pointer-events: none;
+      background: radial-gradient(circle, rgba(20,150,255,0.16), transparent 62%); }
+    .hero-inner { position: relative; text-align: center; }
+    .eyebrow { display: inline-block; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--green); border: 1px solid var(--border); background: var(--bg-card);
+      padding: 5px 12px; border-radius: 999px; margin-bottom: 22px; font-weight: 600; }
+    h1 { font-size: clamp(2.1rem, 6vw, 3.4rem); line-height: 1.1; font-weight: 800;
+      letter-spacing: -0.02em; margin-bottom: 18px; }
+    h1 .grad { background: linear-gradient(120deg, var(--blue), var(--green) 55%, var(--purple));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { font-size: clamp(1rem, 2.4vw, 1.22rem); color: var(--text-dim);
+      max-width: 700px; margin: 0 auto 30px; }
+    .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 46px; }
+    .btn { padding: 12px 22px; border-radius: 10px; font-weight: 600; font-size: 0.95rem;
+      border: 1px solid var(--border); transition: transform .12s, border-color .12s; }
+    .btn:hover { transform: translateY(-2px); text-decoration: none; }
+    .btn-primary { background: linear-gradient(120deg, var(--blue), #0f6fd0); color: #fff !important; border-color: transparent; }
+    .btn-ghost { background: var(--bg-card); color: var(--text) !important; }
+    .btn-ghost:hover { border-color: var(--blue); }
+
+    .stats { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px 26px; min-width: 150px; }
+    .stat .num { font-size: 1.6rem; font-weight: 800;
+      background: linear-gradient(120deg, var(--blue), var(--green));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat .lbl { font-size: 0.82rem; color: var(--text-dim); margin-top: 2px; }
+
+    .disclaimer { max-width: var(--maxw); margin: 12px auto 0; padding: 16px 20px;
+      background: rgba(255,192,67,0.07); border: 1px solid rgba(255,192,67,0.32);
+      border-radius: var(--radius); color: var(--text-dim); font-size: 0.9rem; }
+    .disclaimer strong { color: var(--warning); }
+
+    section { padding: 64px 0; border-top: 1px solid var(--border); }
+    .sec-head { text-align: center; margin-bottom: 42px; }
+    .sec-head h2 { font-size: clamp(1.6rem, 4vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; }
+    .sec-head p { color: var(--text-dim); margin-top: 10px; max-width: 660px; margin-left: auto; margin-right: auto; }
+    .kicker { color: var(--green); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.08em;
+      text-transform: uppercase; display: block; margin-bottom: 8px; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; transition: transform .14s, border-color .14s; }
+    .card:hover { transform: translateY(-3px); border-color: #34345a; }
+    .card .ico { font-size: 1.5rem; margin-bottom: 12px; display: block; }
+    .card h3 { font-size: 1.06rem; margin-bottom: 8px; font-weight: 700; }
+    .card p { color: var(--text-dim); font-size: 0.92rem; }
+    .card .meta { margin-top: 12px; font-size: 0.78rem; color: var(--text-faint);
+      border-top: 1px solid var(--border); padding-top: 10px; }
+
+    .behaviors { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+    .beh { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--blue);
+      border-radius: var(--radius); padding: 20px 22px; }
+    .beh h3 { font-size: 1rem; margin-bottom: 8px; }
+    .beh p { color: var(--text-dim); font-size: 0.9rem; }
+    .beh.b-green { border-left-color: var(--green); }
+    .beh.b-purple { border-left-color: var(--purple); }
+    .beh.b-warn { border-left-color: var(--warning); }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 13px 18px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { background: var(--bg-elev); font-weight: 600; font-size: 0.82rem;
+      text-transform: uppercase; letter-spacing: 0.04em; }
+    tr:last-child td { border-bottom: none; }
+    .tag { display: inline-block; font-size: 0.72rem; padding: 2px 9px; border-radius: 999px;
+      font-weight: 600; white-space: nowrap; }
+    .tag.red { background: rgba(255,107,107,0.15); color: var(--critical); }
+    .tag.green { background: rgba(180,220,0,0.14); color: var(--green); }
+    .tag.dim { background: #22223a; color: var(--text-dim); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .chip { background: var(--bg-card); border: 1px solid var(--border); border-radius: 999px;
+      padding: 8px 16px; font-size: 0.88rem; color: var(--text-dim); font-weight: 500; }
+    .chip b { color: var(--text); font-weight: 600; }
+
+    pre { background: #0d0d18; border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; overflow-x: auto; font-size: 0.86rem; line-height: 1.7;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace; color: #c9d7ff; }
+    pre .c { color: var(--text-faint); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 820px) { .two-col { grid-template-columns: 1fr; } }
+    .note { color: var(--text-dim); font-size: 0.9rem; margin-top: 18px; }
+    .callout { background: rgba(20,150,255,0.06); border: 1px solid rgba(20,150,255,0.3);
+      border-radius: var(--radius); padding: 14px 18px; font-size: 0.88rem; color: var(--text-dim); margin-top: 18px; }
+    ul.tick { list-style: none; margin-top: 10px; }
+    ul.tick li { padding-left: 26px; position: relative; margin-bottom: 8px; color: var(--text-dim); font-size: 0.92rem; }
+    ul.tick li::before { content: "→"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+
+    .preview { margin: 44px auto 0; max-width: 960px; border-radius: var(--radius); overflow: hidden;
+      border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.45); }
+    .preview img { display: block; width: 100%; height: auto; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+    .shot { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+      transition: transform .14s, border-color .14s; }
+    .shot:hover { transform: translateY(-3px); border-color: #34345a; }
+    .shot a { display: block; }
+    .shot img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--border); }
+    .shot figcaption { padding: 14px 18px; color: var(--text-dim); font-size: 0.9rem; }
+    .shot figcaption b { color: var(--text); display: block; margin-bottom: 2px; }
+    ol.steps { counter-reset: step; list-style: none; display: grid; gap: 14px; }
+    ol.steps li { counter-increment: step; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px 16px 64px; position: relative; color: var(--text-dim); }
+    ol.steps li::before { content: counter(step); position: absolute; left: 18px; top: 14px; width: 30px; height: 30px;
+      border-radius: 50%; background: linear-gradient(120deg, var(--blue), var(--green)); color: #0b0b16;
+      font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    ol.steps li b { color: var(--text); }
+    ol.steps pre { margin-top: 10px; }
+
+    footer { border-top: 1px solid var(--border); padding: 40px 0; text-align: center;
+      color: var(--text-faint); font-size: 0.88rem; }
+    footer a { color: var(--text-dim); }
+    footer .fnote { margin-top: 10px; font-size: 0.8rem; max-width: 560px; margin-left: auto; margin-right: auto; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><img src="icon.svg" alt="" /> Multi-lane Free Flow</div>
+    <div class="nav-links">
+      <a href="#gallery">Screenshots</a>
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#stack">Stack</a>
+      <a href="#cost">Query Cost</a>
+      <a href="#structure">Structure</a>
+      <a href="#install">Install</a>
+      <a href="#trouble">Troubleshooting</a>
+      <a class="nav-gh" href="https://github.com/adrianorafael/multi-lane-free-flow">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-inner">
+    <span class="eyebrow">Demo Dynatrace App · Built with vibecoding · v0.1.0</span>
+    <h1>Multi-lane Free Flow <span class="grad">for Dynatrace</span></h1>
+    <p class="subtitle">A live, animated multi-lane free-flow toll gantry inside Dynatrace: every vehicle, tag read, plate read and
+      charge on screen — and Dynatrace Intelligence explaining, in dollars, what goes wrong.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#install">Install it</a>
+      <a class="btn btn-ghost" href="https://github.com/adrianorafael/multi-lane-free-flow">View on GitHub</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="num">React 18 + TS</div><div class="lbl">Strato Design System 3.x</div></div>
+      <div class="stat"><div class="num">0 queries</div><div class="lbl">in-browser simulator · no scopes</div></div>
+      <div class="stat"><div class="num">6 scenarios</div><div class="lbl">replayed at 100×</div></div>
+      <div class="stat"><div class="num">3 views</div><div class="lbl">Live · How it works · Data &amp; integrations</div></div>
+    </div>
+    <div class="preview"><img src="img/live.gif" alt="Animated preview: vehicles crossing the gantry while KPIs update in real time" width="960" height="334" /></div>
+  </div>
+  <div class="wrap">
+    <p class="disclaimer">
+      ⚠️ <strong>Disclaimer:</strong> Created and maintained by
+      <a href="https://github.com/adrianorafael">@adrianorafael</a>
+      with <strong>no affiliation with Dynatrace</strong> and no responsibility for any failures,
+      issues, or consumption of resources and licenses. It is a <strong>study/demo version with no
+      official support</strong>. Installing it in your environment is at your own risk. You are equally
+      free to improve and expand its features. "Multi-lane Free Flow" is a fictitious operator; all data is simulated.
+    </p>
+  </div>
+</header>
+
+<section id="gallery">
+  <div class="wrap">
+    <div class="sec-head"><span class="kicker">See it in action</span><h2>Screenshots</h2>
+      <p>Dark theme · simulated data for a fictitious operator. Click any image to open it at full size.</p></div>
+    <div class="gallery">
+      <figure class="shot"><a href="img/live-overview.png"><img src="img/live-overview.png" alt="Live view at the evening peak" loading="lazy" /></a>
+        <figcaption><b>Live view at the evening peak</b>KPIs, animated gantry, gantry health, OCR camera, pipeline and latest transactions.</figcaption></figure>
+      <figure class="shot"><a href="img/scenario-fog.png"><img src="img/scenario-fog.png" alt="Fog incident" loading="lazy" /></a>
+        <figcaption><b>Fog incident</b>OCR confidence drops on every lane, health turns red, the camera image blurs.</figcaption></figure>
+      <figure class="shot"><a href="img/dynatrace-intelligence.png"><img src="img/dynatrace-intelligence.png" alt="Dynatrace Intelligence drawer" loading="lazy" /></a>
+        <figcaption><b>Dynatrace Intelligence</b>Root cause, impact, recommended action and a streamed explanation (simulated).</figcaption></figure>
+      <figure class="shot"><a href="img/pipeline-zoom.png"><img src="img/pipeline-zoom.png" alt="Pipeline zoom during a tag issuer outage" loading="lazy" /></a>
+        <figcaption><b>Pipeline zoom · tag issuer outage</b>Circuit breaker open, messages held in the queue, dead-letter queue growing.</figcaption></figure>
+      <figure class="shot"><a href="img/scenario-ir-night.png"><img src="img/scenario-ir-night.png" alt="Night scene with an IR illuminator failure" loading="lazy" /></a>
+        <figcaption><b>Night · IR illuminator failure</b>Only inbound lane 3 loses automatic reads: one lane, one device.</figcaption></figure>
+      <figure class="shot"><a href="img/transaction-journey.png"><img src="img/transaction-journey.png" alt="Transaction journey waterfall" loading="lazy" /></a>
+        <figcaption><b>Transaction journey</b>Trace-like waterfall from detection at the gantry to the settled charge.</figcaption></figure>
+      <figure class="shot"><a href="img/data-integrations.png"><img src="img/data-integrations.png" alt="Data and integrations tab" loading="lazy" /></a>
+        <figcaption><b>Data &amp; integrations</b>Every field and metric needed to run the app on real data.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head"><span class="kicker">Features</span><h2>What it does</h2>
+      <p>A demo-ready story from the road to revenue: see the traffic, see the money, and see Dynatrace find the problem.</p></div>
+    <div class="grid">
+      <div class="card"><span class="ico">🛣️</span><h3>Animated gantry</h3>
+        <p>2 directions × 4 lanes. Laser sweeps, tag pulses and camera flashes at the gantry; a colored halo and badge show tag, OCR, review or unread.</p>
+        <div class="meta">Every vehicle is one simulated transaction · day/night, fog, IR cones</div></div>
+      <div class="card"><span class="ico">📈</span><h3>Live KPI ribbon</h3>
+        <p>Plaza health, transactions and revenue today, flow vs expected, automatic identification, OCR confidence, passage-to-charge p95.</p>
+        <div class="meta">Green / yellow / red thresholds · loss metrics are never green · rolling counters · sparklines</div></div>
+      <div class="card"><span class="ico">📷</span><h3>OCR camera view</h3>
+        <p>The last plate decoded character by character with per-character confidence; the image blurs in fog and goes dark when the IR illuminator fails.</p>
+        <div class="meta">Fictitious plates, masked by default (last two digits)</div></div>
+      <div class="card"><span class="ico">💸</span><h3>Road to revenue</h3>
+        <p>One dot per transaction through edge services, queue tanks, rating, tag gateway and partners; coins fly to the revenue KPI when charges settle.</p>
+        <div class="meta">Circuit breaker, dead-letter queue and reprocessing burst · zoom into a large live view</div></div>
+      <div class="card"><span class="ico">✨</span><h3>Dynatrace Intelligence</h3>
+        <p>Collapsible drawer with root cause, affected entities, live impact, time to detection, recommended action and a streamed explanation.</p>
+        <div class="meta">Scripted and labelled "Simulation" · Strato AI chip and disclaimer</div></div>
+      <div class="card"><span class="ico">🎬</span><h3>Presenter tools</h3>
+        <p>Six scenarios, 1× / 4× / 10× speed, simulated hour, seed, 5-minute automatic tour, TV mode, "Dynatrace sources" overlay and a demo summary.</p>
+        <div class="meta">Keyboard shortcuts 0–6, Space, P, I, D, T, R, M</div></div>
+      <div class="card"><span class="ico">🧭</span><h3>Transaction journey</h3>
+        <p>Click any vehicle or row for a trace-like waterfall from detection at the gantry to the settled charge.</p>
+        <div class="meta">Pending steps pulse while the charge is in flight</div></div>
+      <div class="card"><span class="ico">🗺️</span><h3>Data &amp; integrations</h3>
+        <p>Every event field, metric per device type, reference table and rollout step needed to run the app on real data.</p>
+        <div class="meta">Cameras, IR, tag readers, lasers, lane controllers, cabinet, UPS, backhaul, edge DC</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head"><span class="kicker">Under the hood</span><h2>How it works</h2>
+      <p>The important behaviors to understand before running it in a real environment.</p></div>
+    <div class="behaviors">
+      <div class="beh"><h3>🔵 Everything is simulated</h3><p>No data leaves or enters the tenant. The operator, gantry, tag issuers, partners, plates and incidents are fictitious; Intelligence texts are scripted per scenario.</p></div>
+      <div class="beh b-warn"><h3>🟡 Incidents run in accelerated replay</h3><p>Rates come from the live vehicles; accumulated values (backlog, revenue at risk, duration) follow a scripted timeline at about 100×. The header says so whenever it is active.</p></div>
+      <div class="beh b-green"><h3>🟢 Local time zone</h3><p>Volume, day/night and headlights follow the viewer's clock. Use the presenter's simulated hour for a peak at any time of day.</p></div>
+      <div class="beh b-purple"><h3>🟣 Deterministic by seed</h3><p>The same seed replays the same sequence of vehicles, so a demo can be rehearsed.</p></div>
+      <div class="beh"><h3>🔵 Hidden tabs</h3><p>When the tab is hidden only the daily totals advance; vehicles resume when you return.</p></div>
+      <div class="beh b-green"><h3>🟢 Preferences are per browser</h3><p>Masking, pinned camera, TV mode and the optional dashboard ID live in <code>localStorage</code>.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="wrap">
+    <div class="sec-head"><span class="kicker">Built with</span><h2>Tech stack</h2>
+      <p>A vanilla Dynatrace App Toolkit project — the kind you can scaffold and extend yourself.</p></div>
+    <div class="chips">
+      <span class="chip"><b>React</b> 18.3</span>
+      <span class="chip"><b>TypeScript</b> 6.0</span>
+      <span class="chip"><b>Strato</b> Design System 3.14</span>
+      <span class="chip"><b>SVG</b> + requestAnimationFrame</span>
+      <span class="chip"><b>@dynatrace-sdk</b> navigation</span>
+      <span class="chip"><b>dt-app</b> CLI 1.18</span>
+      <span class="chip"><b>app id</b> <code>my.multi.lane.free.flow</code></span>
+    </div>
+  </div>
+</section>
+
+<section id="cost">
+  <div class="wrap">
+    <div class="sec-head"><span class="kicker">Cost awareness</span><h2>Query cost &amp; consumption (DPS)</h2>
+      <p>Version 0.1.0 runs <b>no DQL queries and no app functions</b>: it creates no Grail query consumption.
+        The figures below are for a future real-data mode that is not shipped.</p></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Cost driver</th><th>Impact in data-driven apps</th><th>This version</th></tr></thead>
+        <tbody>
+          <tr><td><b>Auto-refresh / polling</b></td><td><span class="tag red">Dominant</span> — 1 query per interval, per open tab</td>
+              <td>Not applicable (no queries)</td></tr>
+          <tr><td>Timeframe width</td><td><span class="tag dim">Medium</span> — wider window = more data scanned</td>
+              <td>Not applicable</td></tr>
+          <tr><td>Concurrent users / tabs</td><td><span class="tag dim">Linear</span></td>
+              <td>No effect</td></tr>
+          <tr><td>Data volume</td><td><span class="tag dim">Env-dependent</span></td>
+              <td>No effect</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note"><b>Monthly scenarios</b></p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scenario</th><th>Queries / month</th><th>GB scanned</th><th>Est. cost*</th></tr></thead>
+        <tbody>
+          <tr><td>Version 0.1.0 (simulator), any usage</td><td>0</td><td>0</td>
+              <td><span class="tag green">None</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">A future real-data mode would poll Business Events — polling is the dominant cost driver. No such query
+      ships yet, so there is no measured figure to publish: measure <code>scannedBytes</code> for your own query first, then
+      <code>GB/month ≈ GB_per_query × queries_per_hour × hours_per_day × days × concurrent_tabs</code>.
+      * Multiply GB scanned by your DPS <b>"Grail Query – data analyzed"</b> rate — the amount depends entirely on your rate card.</p>
+    <div class="two-col" style="margin-top:22px">
+      <div class="card"><h3>Measure it precisely</h3>
+        <ul class="tick">
+          <li>Run the query in a <b>Notebook</b> and read <code>metadata.grail.scannedBytes</code>
+              from <code>queryExecute</code>.</li>
+          <li>Confirm aggregates in <b>Account Management → Cost &amp; usage → Grail Query</b>.</li>
+        </ul></div>
+      <div class="card"><h3>Reduce it (future real-data mode)</h3>
+        <ul class="tick">
+          <li>Poll at the slowest interval the demo tolerates; pause when the tab is hidden.</li>
+          <li>Keep the window narrow and read only new records since the last poll.</li>
+          <li>Project only needed fields with <code>| fields …</code> (Grail is columnar).</li>
+          <li>Pre-aggregate KPIs instead of re-reading raw events.</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="structure">
+  <div class="wrap">
+    <div class="sec-head"><span class="kicker">Codebase</span><h2>Project structure</h2></div>
+<pre><span class="c"># configuration</span>
+app.config.json           <span class="c"># environmentUrl (placeholder), app id, version, icon, scopes (none)</span>
+ui/app/
+├── sim/                  <span class="c"># simulator: engine, model, scenarios, journey, calibration tests</span>
+├── scene/                <span class="c"># animated gantry (SVG, imperative)</span>
+├── components/           <span class="c"># KPIs, OCR camera, pipeline, feed, health, Intelligence, details</span>
+├── pages/                <span class="c"># Live, How it works, Data &amp; integrations</span>
+├── data/                 <span class="c"># real-data field and metric map</span>
+├── state/                <span class="c"># engine context, animation loop, shortcuts, tour</span>
+├── theme/colors.ts       <span class="c"># status and brand palette (single source of color)</span>
+└── App.tsx               <span class="c"># route definitions</span>
+ui/assets/                <span class="c"># fictitious brand logos and app icon</span>
+specs/                    <span class="c"># the approved spec</span>
+docs/                     <span class="c"># this page</span>
+scripts/                  <span class="c"># scan-secrets.sh, pre-commit, test-sim.mjs</span></pre>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="sec-head"><span class="kicker">Get running</span><h2>Install it in your environment</h2>
+      <p>From zero to the app running for every user of your tenant, in about five minutes.</p></div>
+    <ol class="steps">
+      <li><b>Check your permissions.</b> Your user needs <code>app-engine:apps:install</code> and <code>app-engine:apps:run</code>
+        in the target environment (ask your Dynatrace admin if not). You also need Node.js 24 and npm ≥ 9.</li>
+      <li><b>Get the code.</b>
+<pre>git clone https://github.com/adrianorafael/multi-lane-free-flow.git
+cd multi-lane-free-flow
+npm install</pre></li>
+      <li><b>Point it at your environment.</b> In <code>app.config.json</code>, replace <code>YOUR-ENVIRONMENT</code> in
+        <code>environmentUrl</code> with your tenant ID — copy it from your browser's address bar:
+        <code>https://YOUR-TENANT-ID.apps.dynatrace.com/</code>.</li>
+      <li><b>(Optional) Try it first</b> without installing: <code>npx dt-app dev</code>, then open the
+        <b>local-dev-server link</b> it prints (not <code>localhost:3000</code> directly).</li>
+      <li><b>Install it.</b>
+<pre>npx dt-app deploy</pre>
+        The first run opens your browser for the Dynatrace login. The app declares no OAuth scopes, so there is no data-access consent screen.</li>
+      <li><b>Open it</b> in Dynatrace: <b>Apps</b> (or search) → <b>Multi-lane Free Flow</b>.</li>
+      <li><b>Present it:</b> <b>P</b> opens the presenter panel, <b>1–6</b> trigger the scenarios, <b>I</b> opens Dynatrace Intelligence —
+        or start the 5-minute automatic tour from the presenter panel.</li>
+      <li><b>Update or remove it:</b> bump <code>app.version</code> and run <code>npx dt-app deploy</code> again;
+        <code>npx dt-app uninstall</code> removes it (needs <code>app-engine:apps:delete</code>).</li>
+    </ol>
+
+    <div class="two-col" style="margin-top:24px">
+      <div class="card"><h3>npm scripts</h3>
+        <ul class="tick"><li><code>npm run start</code> — dev server</li>
+          <li><code>npm run build</code> — production build</li>
+          <li><code>npm run deploy</code> — deploy to your env</li>
+          <li><code>npm run lint</code> · <code>typecheck</code> · <code>test:sim</code> · <code>scan:secrets</code></li></ul></div>
+      <div class="card"><h3>Required OAuth scopes</h3>
+        <ul class="tick"><li><b>None.</b> The app runs entirely in the browser on simulated data.</li>
+          <li>Adding a scope later would be a MAJOR version: every user re-consents.</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="trouble">
+  <div class="wrap">
+    <div class="sec-head"><span class="kicker">Help</span><h2>Troubleshooting</h2></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Symptom</th><th>Cause &amp; fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>'app.description' must NOT have more than 80 characters</code></td>
+              <td>Shorten the description in <code>app.config.json</code>.</td></tr>
+          <tr><td>Deploy fails because the version already exists</td>
+              <td>Bump <code>app.version</code> in <code>app.config.json</code> (and CHANGELOG, README, page).</td></tr>
+          <tr><td>The app opens at <code>localhost:3000</code> but looks broken</td>
+              <td>Open the link printed by <code>npx dt-app dev</code> — the app must run inside Dynatrace.</td></tr>
+          <tr><td>Few vehicles on screen</td>
+              <td>It is night or early morning in your time zone: use the presenter panel's <i>6 pm</i> simulated hour or the holiday exodus scenario.</td></tr>
+          <tr><td>Nothing moves</td>
+              <td>The simulation is paused (Space) or the browser tab was hidden; press Space.</td></tr>
+          <tr><td>Animations feel heavy on a slow laptop</td>
+              <td>Use 1× speed, avoid combining several scenarios, or enable the OS "reduce motion" setting.</td></tr>
+          <tr><td>"Open dashboard" button missing</td>
+              <td>Paste a dashboard document ID into the presenter panel; the button only shows when set.</td></tr>
+          <tr><td>Warning about the Node.js version</td>
+              <td><code>dt-app</code> supports Node 24; newer versions work but print a warning.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Built by <a href="https://github.com/adrianorafael">@adrianorafael</a> ·
+    <a href="https://github.com/adrianorafael/multi-lane-free-flow">Source on GitHub</a> ·
+    <a href="https://developer.dynatrace.com/">Dynatrace Developer</a> ·
+    <a href="https://github.com/adrianorafael/development-pattern-for-Dynatrace">Development Pattern for Dynatrace</a>
+    <p class="fnote">Version 0.1.0 · MIT License. Not affiliated with, endorsed by, or supported by Dynatrace. Provided "as is"
+      for study and demonstration purposes. Dynatrace and the Dynatrace logo are trademarks of
+      Dynatrace LLC. "Multi-lane Free Flow" and its tag issuers are fictitious.</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1161 @@
+/* Multi-lane Free Flow — layout and animations. UI chrome uses Strato tokens; status colors live in theme/colors.ts. */
+
+.ff-live {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 4px 16px;
+  min-width: 1180px;
+}
+
+.ff-panel {
+  position: relative;
+  background: var(--dt-colors-background-surface-default);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+.ff-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  min-height: 28px;
+}
+.ff-panel-body {
+  min-width: 0;
+}
+.ff-muted {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+.ff-clickable {
+  cursor: pointer;
+}
+
+/* ------------------------------------------------ KPIs */
+.ff-kpis {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.35fr repeat(8, minmax(0, 1fr));
+  gap: 8px;
+}
+.ff-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--dt-colors-background-surface-default);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+}
+.ff-brand-logo {
+  height: 30px;
+  width: auto;
+  align-self: flex-start;
+}
+.ff-brand-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.ff-brand-text span {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+.ff-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  background: var(--dt-colors-background-surface-default);
+  color: var(--dt-colors-text-neutral-default);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transition: background-color 400ms ease, transform 150ms ease;
+  min-width: 0;
+}
+.ff-kpi:hover {
+  transform: translateY(-1px);
+}
+.ff-kpi-status {
+  border-color: transparent;
+}
+.ff-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.ff-kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ff-kpi-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  gap: 4px;
+}
+.ff-kpi-sub {
+  font-size: 11px;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ff-kpis-tv .ff-kpi-value {
+  font-size: 30px;
+}
+.ff-pulse {
+  animation: ff-pulse 600ms cubic-bezier(0.4, 1.6, 0.7, 1);
+}
+@keyframes ff-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* odometer */
+.ff-odo {
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+}
+.ff-odo-digit {
+  display: inline-block;
+  height: 1.15em;
+  overflow: hidden;
+  position: relative;
+}
+.ff-odo-strip {
+  display: flex;
+  flex-direction: column;
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ff-odo-strip span {
+  height: 1.15em;
+  line-height: 1.15em;
+}
+.ff-odo-sep {
+  display: inline-block;
+}
+
+/* coins */
+.ff-coin {
+  position: fixed;
+  z-index: 9999;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff6b0, #f5c400 55%, #b58f00);
+  color: #5a4600;
+  font-size: 8px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  transition: transform 850ms cubic-bezier(0.4, 0, 0.2, 1), opacity 850ms ease-in;
+}
+
+/* ------------------------------------------------ main layout */
+.ff-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 12px;
+  align-items: stretch;
+}
+.ff-scene-panel {
+  padding: 6px;
+  overflow: hidden;
+}
+.ff-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  user-select: none;
+}
+.ff-scene .ff-vehicle {
+  cursor: pointer;
+}
+.ff-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+/* Gantry health matches the scene height; rows spread across it. */
+.ff-side .ff-matrix {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.ff-side .ff-matrix .ff-panel-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.ff-side .ff-matrix-table {
+  flex: 1 1 auto;
+}
+
+/* Collapsible Dynatrace Intelligence on the right edge */
+.ff-intel-tab {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 7px;
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-right: 0;
+  border-radius: 12px 0 0 12px;
+  background: var(--dt-colors-background-surface-default);
+  color: var(--dt-colors-text-neutral-default);
+  box-shadow: -4px 0 14px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+.ff-intel-tab:hover {
+  padding-right: 11px;
+}
+.ff-intel-tab-hidden {
+  visibility: hidden;
+}
+.ff-intel-tab-critical {
+  border-left: 4px solid #dc172a;
+  animation: ff-tab-pulse 1.4s ease-in-out infinite;
+}
+.ff-intel-tab-warning {
+  border-left: 4px solid #f5c400;
+}
+.ff-intel-tab-ok {
+  border-left: 4px solid #22a652;
+}
+@keyframes ff-tab-pulse {
+  0%,
+  100% {
+    box-shadow: -4px 0 14px rgba(0, 0, 0, 0.25);
+  }
+  50% {
+    box-shadow: -4px 0 22px rgba(220, 23, 42, 0.65);
+  }
+}
+.ff-intel-tab-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.04em;
+}
+.ff-intel-badge {
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  background: #dc172a;
+  color: #ffffff;
+}
+.ff-intel-tab-warning .ff-intel-badge {
+  background: #f5c400;
+  color: #1b1b1b;
+}
+.ff-intel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(0, 0, 0, 0.25);
+  animation: ff-fade-in 200ms ease;
+}
+.ff-intel-drawer {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 960;
+  width: min(460px, 92vw);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.35);
+  border-radius: 12px;
+  animation: ff-slide-in 280ms cubic-bezier(0, 0, 0.2, 1);
+}
+.ff-intel-drawer > .ff-intel {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+@keyframes ff-slide-in {
+  from {
+    transform: translateX(110%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes ff-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.ff-bottom {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 560px;
+  gap: 12px;
+}
+.ff-tv .ff-bottom {
+  grid-template-columns: 320px minmax(0, 1fr) 600px;
+}
+
+/* ------------------------------------------------ scene animations */
+.ff-fade {
+  transition: opacity 1200ms ease;
+}
+.ff-blink-warn {
+  animation: ff-blink 1s ease-in-out infinite;
+}
+.ff-blink-crit {
+  animation: ff-blink 0.5s ease-in-out infinite;
+}
+@keyframes ff-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.ff-flow {
+  animation: ff-flow 1.2s linear infinite;
+}
+@keyframes ff-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.ff-fog-a {
+  animation: ff-drift 26s ease-in-out infinite alternate;
+}
+.ff-fog-b {
+  animation: ff-drift 34s ease-in-out infinite alternate-reverse;
+}
+@keyframes ff-drift {
+  from {
+    transform: translateX(-80px);
+  }
+  to {
+    transform: translateX(80px);
+  }
+}
+.ff-hl,
+.ff-hl-ring {
+  fill: none;
+  stroke: #0fa3b1;
+  stroke-width: 4;
+  animation: ff-hl 0.9s ease-in-out infinite;
+}
+@keyframes ff-hl {
+  0%,
+  100% {
+    stroke-opacity: 1;
+  }
+  50% {
+    stroke-opacity: 0.3;
+  }
+}
+
+/* ------------------------------------------------ pipeline */
+.ff-pipe-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.ff-pipe-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.ff-pipe-zoom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ff-pipe-svg-zoom .ff-node-label,
+.ff-pipe-svg-zoom .ff-node-value {
+  font-size: 11.5px;
+}
+.ff-node-box {
+  fill: var(--dt-colors-background-container-neutral-default);
+}
+.ff-node-label {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 11px;
+  font-weight: 600;
+}
+.ff-node-value {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 11px;
+  font-weight: 700;
+}
+.ff-node-sub {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 10px;
+}
+.ff-pipe-stage {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ff-edge {
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 1.6;
+}
+.ff-edge-dashed {
+  stroke-dasharray: 4 4;
+}
+.ff-edge-bad {
+  stroke: #dc172a;
+  stroke-width: 2.4;
+  stroke-dasharray: 6 5;
+}
+.ff-tank {
+  transition: y 400ms ease, height 400ms ease;
+}
+
+/* ------------------------------------------------ OCR camera */
+.ff-cam-wait {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+.ff-cam {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ff-cam-img {
+  position: relative;
+  height: 170px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: linear-gradient(180deg, #5b6470 0%, #3b424b 55%, #2a2f35 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ff-cond-night {
+  background: linear-gradient(180deg, #16241c 0%, #0e1812 100%);
+  filter: saturate(0.4) sepia(0.3) hue-rotate(60deg) brightness(1.1);
+}
+.ff-cond-ir {
+  background: #07090b;
+  filter: brightness(0.35) contrast(0.8) blur(1.2px);
+}
+.ff-cond-fog {
+  filter: blur(2.4px) contrast(0.7) brightness(1.15);
+}
+.ff-cam-vehicle {
+  position: relative;
+  width: 230px;
+  height: 120px;
+  border-radius: 26px 26px 12px 12px;
+  background: linear-gradient(180deg, #c9cdd2, #8e959d);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 12px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.45);
+}
+.ff-kind-truck .ff-cam-vehicle,
+.ff-cam-vehicle.ff-kind-truck,
+.ff-cam-vehicle.ff-kind-bus {
+  width: 250px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #e7e9ec, #9aa1a8);
+}
+.ff-cam-grill {
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 34px;
+  border-radius: 8px;
+  background: repeating-linear-gradient(90deg, #2a2f35 0 6px, #474e56 6px 10px);
+  opacity: 0.8;
+}
+.ff-cam-plate {
+  position: relative;
+  line-height: 0;
+}
+.ff-cam-box {
+  position: absolute;
+  inset: -6px;
+  border: 2px solid;
+  border-radius: 4px;
+  animation: ff-box 250ms cubic-bezier(0, 0, 0.2, 1) both;
+}
+.ff-cam-box span {
+  position: absolute;
+  top: -18px;
+  left: -2px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  padding: 0 5px;
+  color: #1b1b1b;
+  border-radius: 3px;
+}
+@keyframes ff-box {
+  from {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.ff-cam-fog {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 40%, rgba(242, 244, 245, 0.75), rgba(242, 244, 245, 0.35));
+  opacity: 0;
+}
+.ff-cond-fog .ff-cam-fog {
+  opacity: 1;
+}
+.ff-cam-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 3px);
+}
+.ff-cam-stamp,
+.ff-cam-cond {
+  position: absolute;
+  font-family: monospace;
+  font-size: 10px;
+  color: #d8ffd0;
+  text-shadow: 0 1px 2px #000;
+}
+.ff-cam-stamp {
+  left: 8px;
+  top: 6px;
+}
+.ff-cam-cond {
+  right: 8px;
+  bottom: 6px;
+}
+.ff-cam-chars {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+.ff-cam-char {
+  width: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  opacity: 0;
+  animation: ff-char 160ms ease-out forwards;
+}
+.ff-cam-char span {
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+}
+.ff-cam-char i {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  align-self: flex-start;
+}
+@keyframes ff-char {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ff-cam-result {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  justify-content: center;
+}
+.ff-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ------------------------------------------------ pills and list */
+.ff-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px 1px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 18px;
+}
+.ff-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 318px;
+  overflow: hidden;
+}
+.ff-feed-row {
+  display: grid;
+  grid-template-columns: 58px 72px 48px 72px 112px 70px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+  animation: ff-row-in 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ff-feed-row:hover {
+  background: var(--dt-colors-background-container-neutral-default);
+}
+.ff-feed-row .ff-pill {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+@keyframes ff-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ff-feed-time,
+.ff-feed-value {
+  font-variant-numeric: tabular-nums;
+}
+.ff-feed-value {
+  text-align: right;
+  font-weight: 600;
+}
+.ff-feed-lane,
+.ff-feed-cat {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+/* ------------------------------------------------ matrix and infrastructure */
+.ff-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.ff-matrix-table th {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-subdued);
+  padding: 0 2px;
+  text-align: center;
+  line-height: 16px;
+}
+.ff-matrix-table tbody th {
+  text-align: left;
+  white-space: nowrap;
+}
+.ff-matrix-table td {
+  text-align: center;
+  padding: 0;
+}
+.ff-cell {
+  border: 0;
+  background: transparent;
+  padding: 0 6px;
+  line-height: 0;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.ff-cell:hover {
+  background: var(--dt-colors-background-container-neutral-default);
+}
+.ff-infra {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 8px;
+  margin-top: 6px;
+}
+.ff-infra-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 11px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 1px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.ff-infra-row:hover {
+  background: var(--dt-colors-background-container-neutral-default);
+}
+
+/* ------------------------------------------------ Intelligence */
+.ff-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ff-card {
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-left-width: 4px;
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  animation: ff-row-in 300ms ease;
+}
+.ff-card-critical {
+  border-left-color: #dc172a;
+}
+.ff-card-warning {
+  border-left-color: #f5c400;
+}
+.ff-card-ok {
+  border-left-color: #22a652;
+}
+.ff-card-neutral {
+  border-left-color: #8c939f;
+}
+.ff-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.ff-card-title {
+  font-size: 13px;
+}
+.ff-card-meta {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 11px;
+}
+.ff-card-ents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.ff-ent {
+  font: inherit;
+  font-size: 11px;
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  background: var(--dt-colors-background-container-neutral-default);
+  color: inherit;
+  border-radius: 999px;
+  padding: 1px 8px;
+  cursor: pointer;
+}
+.ff-ent:hover {
+  border-color: #0fa3b1;
+}
+.ff-card-sec {
+  line-height: 1.4;
+}
+.ff-card-k {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+.ff-card-impacts {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ff-impact {
+  display: flex;
+  flex-direction: column;
+}
+.ff-impact-v {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ff-impact-l {
+  font-size: 11px;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+.ff-card-ai {
+  border-top: 1px dashed var(--dt-colors-border-neutral-default);
+  padding-top: 6px;
+  font-size: 12px;
+}
+.ff-disclaimer {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+/* ------------------------------------------------ details */
+.ff-details {
+  padding: 4px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ff-det-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.ff-det-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ff-total {
+  font-size: 14px;
+}
+.ff-total b {
+  font-size: 20px;
+}
+.ff-wf {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ff-wf-row {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr) 76px;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+}
+.ff-wf-name {
+  display: flex;
+  flex-direction: column;
+}
+.ff-wf-name small {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+.ff-wf-track {
+  position: relative;
+  height: 12px;
+  background: var(--dt-colors-background-container-neutral-default);
+  border-radius: 3px;
+}
+.ff-wf-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 3px;
+  transition: width 250ms ease;
+}
+.ff-wf-pend {
+  animation: ff-blink 1s ease-in-out infinite;
+}
+.ff-wf-dur {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ff-kvs {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ff-kv {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 8px;
+  font-size: 12px;
+}
+.ff-kv > span:first-child {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+.ff-kv code {
+  font-size: 11px;
+  word-break: break-all;
+}
+.ff-det-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ff-det-spark {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ------------------------------------------------ presenter, tour, summary */
+.ff-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ff-clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.ff-presenter {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 24px;
+}
+.ff-scn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ff-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.ff-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.ff-shortcut {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+.ff-tour {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(900px, 90vw);
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #14213d;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  animation: ff-row-in 300ms ease;
+}
+.ff-tour-kicker {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: #0fa3b1;
+  color: #1b1b1b;
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.ff-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ff-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.ff-summary-grid div {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--dt-colors-background-container-neutral-default);
+}
+.ff-summary-grid b {
+  font-size: 22px;
+}
+.ff-summary-grid span {
+  font-size: 12px;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+.ff-summary-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.ff-summary-quote {
+  font-size: 15px;
+  font-weight: 600;
+  color: #14213d;
+}
+
+/* ------------------------------------------------ Dynatrace sources */
+.ff-source {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 5;
+  max-width: 340px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(20, 33, 61, 0.95);
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 1.35;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  animation: ff-row-in 250ms ease;
+  pointer-events: none;
+}
+.ff-source-kicker {
+  display: block;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0fa3b1;
+}
+
+/* ------------------------------------------------ how it works */
+.ff-about {
+  max-width: 880px;
+  padding: 16px 8px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-blink-warn,
+  .ff-blink-crit,
+  .ff-flow,
+  .ff-fog-a,
+  .ff-fog-b,
+  .ff-hl,
+  .ff-hl-ring,
+  .ff-feed-row,
+  .ff-card,
+  .ff-cam-box,
+  .ff-cam-char {
+    animation: none !important;
+  }
+  .ff-cam-char {
+    opacity: 1;
+  }
+  .ff-odo-strip {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------ data and integrations */
+.ff-data {
+  max-width: 1400px;
+}
+.ff-data code {
+  font-size: 12px;
+}
+.ff-layers {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ff-layer {
+  flex: 1 1 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-top: 3px solid #22a652;
+  background: var(--dt-colors-background-surface-default);
+  font-size: 12px;
+}
+.ff-layer small {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+.ff-layer-arrow {
+  align-self: center;
+  font-size: 18px;
+  color: #22a652;
+}
+.ff-acc-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ff-acc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 8px;
+  overflow-x: auto;
+}
